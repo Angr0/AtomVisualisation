@@ -261,7 +261,7 @@ const Atom = () => {
         Carbon Atom
       </h1>
 
-      <ControlPanel isotope={isotope} setIsotope={setIsotope} colors={colors} />
+      <ControlPanel />
 
       <Canvas
         style={{
