@@ -2,8 +2,17 @@ import React, { useState, useRef, useMemo } from "react";
 import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
 import { Sphere, OrbitControls, Line, Html, Stars } from "@react-three/drei";
 import * as THREE from "three";
+import ControlPanel from "../components/ControlPanel";
 
 extend({ OrbitControls });
+
+const colors = {
+  protonsColor: "#f00",
+  neutronsColor: "#fff",
+  firstShellElectronsColor: "#00cfff",
+  secondShellElectronsColor: "#0066da",
+  thirdShellElectronsColor: "#7b00dc",
+};
 
 const Nucleus = ({ isotope = 12 }) => {
   const sphericalToCartesian = (radius, polar, azimuthal) => {
@@ -15,8 +24,6 @@ const Nucleus = ({ isotope = 12 }) => {
 
   const getNucleons = () => {
     const nucleons = [];
-    const protonColor = "#FFD700";
-    const neutronColor = "#C0C0C0";
     const protons = 6;
     let neutrons;
 
@@ -39,9 +46,9 @@ const Nucleus = ({ isotope = 12 }) => {
       const position = sphericalToCartesian(1.25, polar, azimuthal);
 
       if (i < protons) {
-        nucleons.push({ color: protonColor, position });
+        nucleons.push({ color: colors.protonsColor, position });
       } else {
-        nucleons.push({ color: neutronColor, position });
+        nucleons.push({ color: colors.neutronsColor, position });
       }
     }
 
@@ -67,7 +74,10 @@ const Nucleus = ({ isotope = 12 }) => {
             position={nucleon.position}
             visible={true}
           >
-            <meshLambertMaterial color="#1A1110" wireframe={true} />
+            <meshLambertMaterial
+              color="rgba(255, 255, 255, 0.5)"
+              wireframe={true}
+            />
           </Sphere>
         </>
       ))}
@@ -99,7 +109,11 @@ const SOrbital = ({ position, color, label }) => {
       </Sphere>
       <group ref={labelRef}>
         <Html>
-          <div style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}>{label}</div>
+          <div
+            style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}
+          >
+            {label}
+          </div>
         </Html>
       </group>
     </group>
@@ -140,7 +154,11 @@ const POrbital = ({ position, orientation = "x", color, label }) => {
       </Sphere>
       <group ref={labelRef} position={labelOffset}>
         <Html>
-          <div style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}>{label}</div>
+          <div
+            style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}
+          >
+            {label}
+          </div>
         </Html>
       </group>
     </group>
@@ -174,8 +192,8 @@ const Electron = ({ position, speed, color, plane, label }) => {
             : plane === "xy2"
             ? -position * Math.sin(t)
             : 0,
-          position * Math.sin(t)
-        )
+          position * Math.sin(t),
+        ),
       );
     }
     return points;
@@ -194,7 +212,11 @@ const Electron = ({ position, speed, color, plane, label }) => {
       <Line points={points} color="white" lineWidth={1.5} />
       <group ref={labelRef}>
         <Html>
-          <div style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}>{label}</div>
+          <div
+            style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}
+          >
+            {label}
+          </div>
         </Html>
       </group>
     </group>
@@ -239,149 +261,75 @@ const Atom = () => {
         Carbon Atom
       </h1>
 
-      <div
+      <ControlPanel isotope={isotope} setIsotope={setIsotope} colors={colors} />
+
+      <Canvas
         style={{
+          background: "black",
           position: "absolute",
-          top: "60px",
-          right: "10px",
-          zIndex: 2,
-          marginTop: "1.5rem",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
         }}
       >
-        <label style={{ color: "white", marginRight: "10px" }}>
-          Select Isotope:
-        </label>
-        <select
-          value={isotope}
-          onChange={(e) => setIsotope(parseInt(e.target.value))}
-        >
-          <option value={12}>Carbon-12</option>
-          <option value={13}>Carbon-13</option>
-          <option value={14}>Carbon-14</option>
-        </select>
-      </div>
+        <ambientLight />
+        <pointLight position={[10, 10, 10]} />
+        <Stars />
+        <Nucleus isotope={isotope} />
 
-      <div
-        style={{
-          position: "absolute",
-          top: "110px",
-          right: "10px",
-          zIndex: 2,
-          marginTop: "1.5rem",
-        }}
-      >
-        <div
-          style={{
-            width: "20px",
-            height: "20px",
-            borderRadius: "50%",
-            backgroundColor: "#FFD700",
-            display: "inline-block",
-            verticalAlign: "middle",
-            marginRight: "5px",
-          }}
-        ></div>
-        <span style={{ color: "white", marginRight: "20px" }}>Protons: 6</span>
+        <SOrbital position={[0, 0, 0]} color="#00f" />
+        <Electron
+          position={3}
+          speed={1}
+          color={colors.firstShellElectronsColor}
+          plane="xz"
+          label="1s Electron 1"
+        />
+        <Electron
+          position={-3}
+          speed={1}
+          color={colors.firstShellElectronsColor}
+          plane="xy"
+          label="1s Electron 2"
+        />
 
-        <div
-          style={{
-            width: "20px",
-            height: "20px",
-            borderRadius: "50%",
-            backgroundColor: "#C0C0C0",
-            display: "inline-block",
-            verticalAlign: "middle",
-            marginRight: "5px",
-          }}
-        ></div>
-        <span style={{ color: "white" }}>Neutrons: {isotope - 6}</span>
-      </div>
+        <SOrbital position={[0, 0, 0]} color="#0FF" />
+        <Electron
+          position={5}
+          speed={1.2}
+          color={colors.secondShellElectronsColor}
+          plane="xz"
+          label="2s Electron 1"
+        />
+        <Electron
+          position={-5}
+          speed={1.2}
+          color={colors.secondShellElectronsColor}
+          plane="xy"
+          label="2s Electron 2"
+        />
 
-      <div
-        style={{
-          position: "absolute",
-          top: "170px",
-          right: "10px",
-          zIndex: 2,
-          marginTop: "1.5rem",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "1rem",
-          }}
-        >
-          <div
-            style={{
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              backgroundColor: "#FF0",
-              marginRight: "10px",
-            }}
-          ></div>
-          <span style={{ color: "white", marginRight: "20px" }}>
-            1s Electrons
-          </span>
+        <POrbital position={[0, 0, 0]} orientation="x" color="#F00" />
+        <Electron
+          position={7}
+          speed={1.4}
+          color={colors.thirdShellElectronsColor}
+          plane="xz"
+          label="2px Electron"
+        />
 
-          <div
-            style={{
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              backgroundColor: "#FFA500",
-              marginRight: "10px",
-            }}
-          ></div>
-          <span style={{ color: "white", marginRight: "20px" }}>
-            2s Electrons
-          </span>
+        <POrbital position={[0, 0, 0]} orientation="y" color="#F00" />
+        <Electron
+          position={7}
+          speed={1.4}
+          color={colors.thirdShellElectronsColor}
+          plane="xy"
+          label="2py Electron"
+        />
 
-          <div
-            style={{
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              backgroundColor: "#0F0",
-              marginRight: "10px",
-            }}
-          ></div>
-          <span style={{ color: "white" }}>2p Electrons</span>
-        </div>
-        <div style={{ color: "white", marginTop: "1rem" }}>
-          The electron configuration of carbon is 1s<sup>2</sup> 2s<sup>2</sup>{" "}
-          2p<sup>2</sup>.
-        </div>
-        <div style={{ color: "white", marginTop: "0.5rem", fontStyle: "italic", textAlign:'center' }}>
-          Model is not to scale.
-        </div>
-      </div>
-
-      <Canvas style={{ background: 'black', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-    <ambientLight />
-    <pointLight position={[10, 10, 10]} />
-    <Stars />
-    <Nucleus isotope={isotope} />
-    
-    <SOrbital position={[0, 0, 0]} color="#00F" />
-    <Electron position={3} speed={1} color="#FF0" plane="xz" label="1s Electron 1" />
-    <Electron position={-3} speed={1} color="#FF0" plane="xy" label="1s Electron 2" />
-
-    <SOrbital position={[0, 0, 0]} color="#0FF" />
-    <Electron position={5} speed={1.2} color="#FFA500" plane="xz" label="2s Electron 1" />
-    <Electron position={-5} speed={1.2} color="#FFA500" plane="xy" label="2s Electron 2" />
-    
-    <POrbital position={[0, 0, 0]} orientation="x" color="#F00" />
-    <Electron position={7} speed={1.4} color="#0F0" plane="xz" label="2px Electron" />
-
-    <POrbital position={[0, 0, 0]} orientation="y" color="#F00" />
-    <Electron position={7} speed={1.4} color="#0F0" plane="xy" label="2py Electron" />
-
-    <Controls />
+        <Controls />
       </Canvas>
-
     </div>
   );
 };
