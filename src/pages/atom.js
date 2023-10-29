@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from "react";
 import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
-import { Sphere, OrbitControls, Line, Html, Stars } from "@react-three/drei";
+import { Sphere, OrbitControls, Line, Html } from "@react-three/drei";
 import * as THREE from "three";
 import ControlPanel from "../components/ControlPanel";
 
@@ -275,7 +275,6 @@ const Atom = () => {
       >
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
-        <Stars />
         <Nucleus isotope={isotope} />
 
         <SOrbital position={[0, 0, 0]} color="#00f" />
