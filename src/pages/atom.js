@@ -95,7 +95,7 @@ const Nucleus = ({ isotope = 12, posZ, name, protons, neutrons }) => {
             visible={true}
           >
             <meshLambertMaterial
-              color="rgba(255, 255, 255, 0.5)"
+              color="#FFF"
               wireframe={true}
             />
           </Sphere>
