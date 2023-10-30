@@ -4,6 +4,7 @@ import { Sphere, OrbitControls, Line, Html } from "@react-three/drei";
 import * as THREE from "three";
 import ControlPanel from "../components/ControlPanel";
 import YellowBall from "../components/YellowBall";
+import BlueBall from "../components/BlueBall";
 
 extend({ OrbitControls });
 
@@ -191,13 +192,19 @@ const Atom = () => {
   const [isotope, setIsotope] = useState(12); // Default to Carbon-12
   const [fireBallFired, setFireBallFired] = useState(0);
   const [showSecondAtom, setShowSecondAtom] = useState(false);
+  const [emiteNeutron, setEmiteNeutron] = useState(false);
 
   useEffect(() => {
     if (fireBallFired === 1)
       setTimeout(() => {
-        setShowSecondAtom(true);
-      }, 2500);
-  });
+        if (Math.random() * 100 < 15){
+          setEmiteNeutron(true);
+        }
+        else{
+          setShowSecondAtom(true);
+        }
+      }, 3000);
+  }, [fireBallFired]);
 
   return (
     <div style={{ position: "relative", height: "100vh", width: "100vw" }}>
@@ -271,6 +278,38 @@ const Atom = () => {
             protons={56}
             neutrons={86}
           />
+        )}
+
+        {showSecondAtom && (
+            <BlueBall
+                position={-10}
+                speed={50}
+                color="#fff"
+                plane={"xz"}
+                fireBallFired={0.01}
+                direction={10}
+            />
+        )}
+        {showSecondAtom && (
+            <BlueBall
+                position={-10}
+                speed={50}
+                color="#fff"
+                plane={"xz"}
+                fireBallFired={0.01}
+                direction={0.001}
+            />
+        )}
+
+        {emiteNeutron && (
+            <BlueBall
+                position={-10}
+                speed={50}
+                color="#fff"
+                plane={"xz"}
+                fireBallFired={0.01}
+                direction={10}
+            />
         )}
 
         {!showSecondAtom && (
