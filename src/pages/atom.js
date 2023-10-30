@@ -1,8 +1,9 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
 import { Sphere, OrbitControls, Line, Html } from "@react-three/drei";
 import * as THREE from "three";
 import ControlPanel from "../components/ControlPanel";
+import YellowBall from "../components/YellowBall";
 
 extend({ OrbitControls });
 
@@ -13,26 +14,56 @@ const colors = {
   secondShellElectronsColor: "#0066da",
   thirdShellElectronsColor: "#7b00dc",
 };
+const shells = {
+  k: {
+    distance: 1,
+    numOfElectrons: Array.from(Array(2).keys()),
+  },
+  l: {
+    distance: 2,
+    numOfElectrons: Array.from(Array(8).keys()),
+  },
+  m: {
+    distance: 3,
+    numOfElectrons: Array.from(Array(18).keys()),
+  },
+  n: {
+    distance: 4,
+    numOfElectrons: Array.from(Array(32).keys()),
+  },
+  o: {
+    distance: 5,
+    numOfElectrons: Array.from(Array(22).keys()),
+  },
+  p: {
+    distance: 6,
+    numOfElectrons: Array.from(Array(8).keys()),
+  },
+  q: {
+    distance: 7,
+    numOfElectrons: Array.from(Array(2).keys()),
+  },
+};
 
-const Nucleus = ({ isotope = 12 }) => {
+const Nucleus = ({ isotope = 12, posZ, name, protons, neutrons }) => {
   const sphericalToCartesian = (radius, polar, azimuthal) => {
     const x = radius * Math.sin(polar) * Math.cos(azimuthal);
     const y = radius * Math.sin(polar) * Math.sin(azimuthal);
     const z = radius * Math.cos(polar);
-    return [x, y, z];
+    return [x, y, z + posZ];
   };
 
   const getNucleons = () => {
     const nucleons = [];
-    const protons = 92;
-    let neutrons = 143;
+    // const protons = 92;
+    // let neutrons = 143;
 
     const totalNucleons = protons + neutrons;
 
     for (let i = 0; i < totalNucleons; i++) {
       const polar = Math.acos(1 - (2 * (i + 0.5)) / totalNucleons);
       const azimuthal = Math.sqrt(totalNucleons * Math.PI) * polar;
-      const position = sphericalToCartesian(5, polar, azimuthal);
+      const position = sphericalToCartesian(4, polar, azimuthal);
 
       if (i < protons) {
         nucleons.push({ color: colors.protonsColor, position });
@@ -70,90 +101,16 @@ const Nucleus = ({ isotope = 12 }) => {
           </Sphere>
         </>
       ))}
-      <Html position={[0, 8, 1]}>
+      <Html position={[0, 8, posZ]}>
         <div style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}>
-          uran-235
+          {name}
         </div>
       </Html>
     </group>
   );
 };
 
-const SOrbital = ({ position, color, label }) => {
-  const ref = useRef();
-  const labelRef = useRef();
-  useFrame((state) => {
-    labelRef.current.position.copy(ref.current.position);
-  });
-
-  return (
-    <group>
-      <Sphere ref={ref} args={[0.8, 32, 32]} position={position}>
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          roughness={0.1}
-          metalness={2}
-        />
-      </Sphere>
-      <group ref={labelRef}>
-        <Html>
-          <div
-            style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}>
-            {label}
-          </div>
-        </Html>
-      </group>
-    </group>
-  );
-};
-
-const POrbital = ({ position, orientation = "x", color, label }) => {
-  const ref = useRef();
-  const labelRef = useRef();
-  useFrame((state) => {
-    labelRef.current.position.copy(ref.current.position);
-  });
-
-  const scale =
-    orientation === "y"
-      ? [0.4, 1.2, 0.4]
-      : orientation === "z"
-      ? [0.4, 0.4, 1.2]
-      : [1.2, 0.4, 0.4];
-
-  // label offset
-  let labelOffset = [2, 2, 2]; // Default x-offset
-  if (orientation === "y") {
-    labelOffset = [0, 4, 0]; // y-offset
-  } else if (orientation === "z") {
-    labelOffset = [0, 0, 4]; // z-offset
-  }
-
-  return (
-    <group>
-      <Sphere ref={ref} args={[0.8, 32, 32]} position={position} scale={scale}>
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          roughness={0.1}
-          metalness={2}
-        />
-      </Sphere>
-      <group ref={labelRef} position={labelOffset}>
-        <Html>
-          <div
-            style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}
-          >
-            {label}
-          </div>
-        </Html>
-      </group>
-    </group>
-  );
-};
-
-const Electron = ({ position, speed, color, plane, label }) => {
+const Electron = ({ position, speed, color, plane, label, index }) => {
   const ref = useRef();
   const labelRef = useRef();
   useFrame((state) => {
@@ -232,6 +189,15 @@ const Controls = () => {
 
 const Atom = () => {
   const [isotope, setIsotope] = useState(12); // Default to Carbon-12
+  const [fireBallFired, setFireBallFired] = useState(0);
+  const [showSecondAtom, setShowSecondAtom] = useState(false);
+
+  useEffect(() => {
+    if (fireBallFired === 1)
+      setTimeout(() => {
+        setShowSecondAtom(true);
+      }, 2500);
+  });
 
   return (
     <div style={{ position: "relative", height: "100vh", width: "100vw" }}>
@@ -249,7 +215,7 @@ const Atom = () => {
         Rozszczepienie jądra atomowego
       </h1>
 
-      <ControlPanel />
+      <ControlPanel setFireBallFired={setFireBallFired} />
 
       <Canvas
         style={{
@@ -263,51 +229,59 @@ const Atom = () => {
       >
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
-        <Nucleus isotope={isotope} />
 
-        <SOrbital position={[0, 0, 0]} color="#00f" />
-        <Electron
-          position={6}
-          speed={1}
-          color={colors.firstShellElectronsColor}
-          plane="xz"
-        />
-        <Electron
-          position={-6}
-          speed={1}
-          color={colors.firstShellElectronsColor}
-          plane="xy"
-        />
+        {!showSecondAtom && (
+          <Nucleus
+            isotope={isotope}
+            posZ={1}
+            name={"uran-235"}
+            protons={92}
+            neutrons={143}
+          />
+        )}
+        {!showSecondAtom &&
+          Object.values(shells).map(({ distance, numOfElectrons }) => (
+            <>
+              {numOfElectrons.map((item, index) => (
+                <Electron
+                  key={index}
+                  position={distance + 6}
+                  index={index}
+                  speed={(index + 1) * 0.1}
+                  color={colors.firstShellElectronsColor}
+                  plane={index % 2 === 0 ? "xy2" : "xy"}
+                />
+              ))}
+            </>
+          ))}
+        {showSecondAtom && (
+          <Nucleus
+            isotope={isotope}
+            posZ={10}
+            name={"krypton-92"}
+            protons={36}
+            neutrons={56}
+          />
+        )}
+        {showSecondAtom && (
+          <Nucleus
+            isotope={isotope}
+            posZ={-10}
+            name={"bar-142"}
+            protons={56}
+            neutrons={86}
+          />
+        )}
 
-        <SOrbital position={[0, 0, 0]} color="#0FF" />
-        <Electron
-          position={10}
-          speed={1.2}
-          color={colors.secondShellElectronsColor}
-          plane="xz"
-        />
-        <Electron
-          position={-10}
-          speed={1.2}
-          color={colors.secondShellElectronsColor}
-          plane="xy"
-        />
-
-        <POrbital position={[0, 0, 0]} orientation="x" color="#F00" />
-        <Electron
-          position={14}
-          speed={1.4}
-          color={colors.thirdShellElectronsColor}
-          plane="xz"
-        />
-
-        <POrbital position={[0, 0, 0]} orientation="y" color="#F00" />
-        <Electron
-          position={14}
-          speed={1.4}
-          color={colors.thirdShellElectronsColor}
-          plane="xy"
-        />
+        {!showSecondAtom && (
+          <YellowBall
+            position={7}
+            speed={4}
+            color="#fff"
+            plane={"xz"}
+            fireBallFired={fireBallFired}
+          />
+        )}
 
         <Controls />
       </Canvas>
