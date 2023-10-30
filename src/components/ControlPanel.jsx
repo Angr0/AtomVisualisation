@@ -6,7 +6,6 @@ const ControlPanel = ({ setFireBallFired }) => {
   };
 
   const Fire = () => {
-    if (Math.random() * 100 < 15) return;
     setFireBallFired(1);
   };
 
