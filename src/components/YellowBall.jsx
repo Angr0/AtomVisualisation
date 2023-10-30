@@ -1,22 +1,29 @@
 import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { Html, Line, Sphere } from "@react-three/drei";
+import { Html, Sphere } from "@react-three/drei";
 
-const YellowBall = ({ position, speed, color, plane, label }) => {
+const YellowBall = ({
+  position,
+  speed,
+  color,
+  plane,
+  label,
+  fireBallFired,
+}) => {
   const ref = useRef();
   const labelRef = useRef();
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
-    ref.current.position.x = position * (time * speed);
-    ref.current.position.z = position * (time * speed);
+    ref.current.position.x = (position * (time * speed) - 100) * fireBallFired;
+    ref.current.position.z = (position * (time * speed) - 100) * fireBallFired;
     if (
-      ref.current.position.x > 10 ||
-      ref.current.position.z > 10 ||
-      ref.current.position.y > 10
+      ref.current.position.x > 0 ||
+      ref.current.position.z > 0 ||
+      ref.current.position.y > 0
     ) {
-      ref.current.position.x = 10;
-      ref.current.position.z = 10;
+      ref.current.position.x = 0;
+      ref.current.position.z = 0;
     }
     labelRef.current.position.copy(ref.current.position);
   });
@@ -50,7 +57,6 @@ const YellowBall = ({ position, speed, color, plane, label }) => {
           metalness={2}
         />
       </Sphere>
-      <Line points={points} color="white" lineWidth={1.5} />
       <group ref={labelRef}>
         <Html>
           <div
