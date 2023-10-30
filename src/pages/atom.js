@@ -24,26 +24,15 @@ const Nucleus = ({ isotope = 12 }) => {
 
   const getNucleons = () => {
     const nucleons = [];
-    const protons = 6;
-    let neutrons;
-
-    switch (isotope) {
-      case 13:
-        neutrons = 7;
-        break;
-      case 14:
-        neutrons = 8;
-        break;
-      default:
-        neutrons = 6; // For Carbon-12
-    }
+    const protons = 92;
+    let neutrons = 143;
 
     const totalNucleons = protons + neutrons;
 
     for (let i = 0; i < totalNucleons; i++) {
       const polar = Math.acos(1 - (2 * (i + 0.5)) / totalNucleons);
       const azimuthal = Math.sqrt(totalNucleons * Math.PI) * polar;
-      const position = sphericalToCartesian(1.25, polar, azimuthal);
+      const position = sphericalToCartesian(5, polar, azimuthal);
 
       if (i < protons) {
         nucleons.push({ color: colors.protonsColor, position });
@@ -81,9 +70,9 @@ const Nucleus = ({ isotope = 12 }) => {
           </Sphere>
         </>
       ))}
-      <Html position={[0, 4, 1]}>
+      <Html position={[0, 8, 1]}>
         <div style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}>
-          Carbon-{isotope}
+          uran-235
         </div>
       </Html>
     </group>
@@ -110,8 +99,7 @@ const SOrbital = ({ position, color, label }) => {
       <group ref={labelRef}>
         <Html>
           <div
-            style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}
-          >
+            style={{ color: "white", fontSize: "1em", whiteSpace: "nowrap" }}>
             {label}
           </div>
         </Html>
@@ -225,9 +213,9 @@ const Electron = ({ position, speed, color, plane, label }) => {
 
 const Controls = () => {
   const { camera, gl } = useThree();
-  camera.position.x = 12.5;
+  camera.position.x = 20.5;
   camera.position.y = 1.5;
-  camera.position.z = -0.01;
+  camera.position.z = -0.1;
   camera.lookAt(0, 0, 0);
   const controls = useRef();
   useFrame((state) => {
@@ -258,7 +246,7 @@ const Atom = () => {
           fontFamily: "math",
         }}
       >
-        Carbon Atom
+        Rozszczepienie jądra atomowego
       </h1>
 
       <ControlPanel />
@@ -279,52 +267,46 @@ const Atom = () => {
 
         <SOrbital position={[0, 0, 0]} color="#00f" />
         <Electron
-          position={3}
+          position={6}
           speed={1}
           color={colors.firstShellElectronsColor}
           plane="xz"
-          label="1s Electron 1"
         />
         <Electron
-          position={-3}
+          position={-6}
           speed={1}
           color={colors.firstShellElectronsColor}
           plane="xy"
-          label="1s Electron 2"
         />
 
         <SOrbital position={[0, 0, 0]} color="#0FF" />
         <Electron
-          position={5}
+          position={10}
           speed={1.2}
           color={colors.secondShellElectronsColor}
           plane="xz"
-          label="2s Electron 1"
         />
         <Electron
-          position={-5}
+          position={-10}
           speed={1.2}
           color={colors.secondShellElectronsColor}
           plane="xy"
-          label="2s Electron 2"
         />
 
         <POrbital position={[0, 0, 0]} orientation="x" color="#F00" />
         <Electron
-          position={7}
+          position={14}
           speed={1.4}
           color={colors.thirdShellElectronsColor}
           plane="xz"
-          label="2px Electron"
         />
 
         <POrbital position={[0, 0, 0]} orientation="y" color="#F00" />
         <Electron
-          position={7}
+          position={14}
           speed={1.4}
           color={colors.thirdShellElectronsColor}
           plane="xy"
-          label="2py Electron"
         />
 
         <Controls />
